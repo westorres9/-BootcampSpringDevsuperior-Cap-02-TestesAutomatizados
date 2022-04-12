@@ -30,11 +30,8 @@ public class Account {
 	
 	public void deposit(double amount) {
 		if(amount > 0) {
-		amount += amount * DEPOSIT_FEE_PERCENTAGE;
+		amount -= amount * DEPOSIT_FEE_PERCENTAGE;
 		balance += amount;
-		}
-		else {
-			System.out.println("amount not be negative value");
 		}
 	}
 	

@@ -1,9 +1,12 @@
 package com.devsuperior.dscatalog.services;
 
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.mockito.Mockito;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import com.devsuperior.dscatalog.repositories.ProductRepository;
@@ -14,10 +17,30 @@ public class ProductServiceTests {
 	@InjectMocks
 	private ProductService service;
 	
-	@Mock //usada quando classe de teste não carrega contexto da aplicação, para testes mais isolados
-	private ProductRepository repository; // normalmente usada junto com @ExtendWith  +rapido + enxuto
+	@Mock
+	private ProductRepository repository;
 	
-	@MockBean //usada quando classes de teste carrega contexto da aplicação, e precisa carregar algum bean do sistema
-	private ProductRepository repository2;//@WebMvcTest    @SpringBootTest   +lento
+	private long existingId;
+	private long nonExistingId;
+	private long countTotalProducts;
+	
+	@BeforeEach
+	void setUp() throws Exception {
+		existingId = 1L;
+		nonExistingId = 1000L;
+		
+		Mockito.doNothing().when(repository).deleteById(existingId);;
+	}
+	
+	@Test
+	public void deleteShouldDoNothingWhenIdExists() {
+		
+		Assertions.assertDoesNotThrow(() -> {
+			service.delete(existingId);
+		});
+		
+		Mockito.verify(repository, Mockito.times(1)).deleteById(existingId);
+	}
+
 	
 }

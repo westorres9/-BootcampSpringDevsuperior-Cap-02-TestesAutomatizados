@@ -1,6 +1,6 @@
 package com.devsuperior.dscatalog.services;
 
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 import java.util.List;
 import java.util.Optional;
@@ -15,10 +15,13 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import com.devsuperior.dscatalog.DTO.ProductDTO;
 import com.devsuperior.dscatalog.entities.Product;
 import com.devsuperior.dscatalog.repositories.ProductRepository;
 import com.devsuperior.dscatalog.services.exceptions.DatabaseException;
@@ -39,6 +42,7 @@ public class ProductServiceTests {
 	private long dependentId;
 	private PageImpl<Product> page;
 	private Product product;
+	private ProductDTO productDTO;
 	
 	@BeforeEach
 	void setUp() throws Exception {
@@ -58,6 +62,32 @@ public class ProductServiceTests {
 		Mockito.doNothing().when(repository).deleteById(existingId);
 		Mockito.doThrow(EmptyResultDataAccessException.class).when(repository).deleteById(nonExistingId);
 		Mockito.doThrow(DataIntegrityViolationException.class).when(repository).deleteById(dependentId);
+	}
+	
+	@Test
+	public void findByIdShouldReturnProductDtoWhenIdExists() {
+		
+		ProductDTO result = service.findById(existingId);
+		
+		Assertions.assertNotNull(result);
+	}
+	
+	@Test void findByIdShouldThrowResourceNotFoundExceptionWhenIdDoesNotExists() {
+		
+		Assertions.assertThrows(ResourceNotFoundException.class,() -> {
+			service.findById(nonExistingId);
+		});
+	}
+	
+	@Test
+	public void findByAllPagedShouldReturnPage() {
+		Pageable pageable = PageRequest.of(0, 12);
+		
+		Page<ProductDTO> result = service.findAll(pageable);
+		
+		Assertions.assertNotNull(result);
+		
+		Mockito.verify(repository, times(1)).findAll(pageable);
 	}
 	
 	@Test
